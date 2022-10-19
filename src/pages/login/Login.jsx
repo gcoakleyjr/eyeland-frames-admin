@@ -3,10 +3,8 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from '../../redux/apiCalls';
 import { useHistory } from 'react-router-dom'
-import { loginFailure, loginStart, loginSuccess } from "../../redux/userRedux"
-import { publicRequest } from '../../requestMethods';
-
 import styled from "styled-components";
+import { useEffect } from 'react';
 
 const Wrapper = styled.div`
 display: flex;
@@ -44,22 +42,23 @@ const Login = () => {
 
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
+
   const dispatch = useDispatch()
-  const { isFetching, error } = useSelector(state => state.user)
+  const { isFetching, error, loggedIn } = useSelector(state => state.user)
 
 
   const handleLogin = async (e) => {
     e.preventDefault()
-    dispatch(loginStart());
 
-    try {
-      const res = await publicRequest.post("/auth/login", { username, password });
-      dispatch(loginSuccess(res.data));
-      history.push('/', { replace: true });
-    } catch (err) {
-      dispatch(loginFailure());
-    }
+    login(dispatch, { username, password })
+
   }
+
+  useEffect(() => {
+    if (loggedIn) {
+      history.push('/', { replace: true });
+    }
+  }, [loggedIn, history])
 
   return (
     <Wrapper>
